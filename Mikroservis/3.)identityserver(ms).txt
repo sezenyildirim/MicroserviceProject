@@ -1,0 +1,15 @@
+Bu ms, token dağıtmakla görevli olacak. IdentityServer kütüphanesi kullanılacak.Biliyorsunuz ki, server side geliştirilen bir web uygulamasında kullanıcı denetimleri genellikle Cookie, 
+Session gibi aparatlar sayesinde gerçekleştirilmektedir.(Bknz: Asp.NET Core Identity – Yazı Dizisi) Bunların dışında Client Side geliştirilen uygulamalarda ise Json Web Token(JWT) tabanlı denetimler tercih edilmektedir.
+Tüm bunlardaki amaç sistemi dış dünyaya karşı korumak ve dış dünyadaki tüketicileri tanımlı/bilinir hale getirmektir.
+İşte bu misalden yola çıkarsak, bir uygulamaya erişim gösterecek tüm client’lar için authentication ve authorization sorumluluğunu üstlenecek uygulamaya ihtiyacımız olduğu kanaatine varmaktayız. Burada devreye 
+IdentityServer4 girmektedir. Lakin IdentityServer4’ün ne olduğuna ve ihtiyacının tam olarak nerelerde hissedildiğine değinmeden önce OAuth 2.0 ve OpenID Connect protokolleri üzerinde bilgi sahibi olunması gerekmektedir.
+Identity Server4, .Net Core için  OpenId Connect ve OAuth2 protokolleri kullanan açık kaynak kodlu bir framework’dür. IdentityServer ile web uygulamalarımız veya Web Api’lerimiz için tek bir noktadan uygulamalar arası veya 
+kullanıcı bazında kimliklendirme ve erişim kontrolü sağlayabiliriz. Kurumsal uygulamalarda veya modern web uygulamalarında Web Api veya Api’lere (Resource) erişmek isteyen web, javascript veya native client uygulamaların nasıl bir 
+doğrulama ve yetkilendirme kullanarak erişebileceklerini IdentityServer belirler. Bunun için Web api tarafında client uygulamasına özgü kimliklendirme yazmaya gerek kalmaz.
+
+
+EndPoint
+---------
+ 
+identityserver template'inin içerisinde hazır gelen endpointler ile token alabilir, token geçersiz kılınabilir, token kontrol edilebilir.
+

@@ -1,0 +1,36 @@
+Dockerize Yapmak
+
+FROM image_linki --> runtime sdk dockerhub'dan çağrılacak
+WORKDIR /app --> image içinde bir app klasörü oluşturuacak burada çalıştıracak.
+COPY  --> image içine dosya gönderiyoruz bin içine release
+COPY bin/Release/netcoreapp6.0/publish /app/ (app ile publish arsında boşluk var soldakini sağa kopyala) dockerfile dosyası neredeyse oradan itibaren yazılıyor
+ENTRYPOINT ["dotnet", "Project24.dll"]
+
+Docker CLI Komutları
+
+docker build -t project24img . (. dockerfile path'i verir)(project24:61 deseydik etiket vermiş olacaktık demeyince latest veriyor)
+docker images (docker üzerinde kurulu image listesini verir)
+
+
+Container oluşturmak
+docker create --name project24_container project24img (container adı - image adı)
+docker ps -a (mevcut container listesi verir) 
+docker ps (çalışan container listesi verir)
+docker start project24_container (docker container çalıştırma)
+docker stop project24_container (docker container durdurma)
+
+(docker ps -a yaptıktan sonra varolan container listesinden id bazlı çalıştırmak için
+fe6100571 container id gibi 
+docker start fe6 çalıştırma işlemi yapar)
+
+docker attach fe6 (ilgili container içindeki uygulamanın çıktısını verir console app için)
+docker run --name project24_container project24img (create ve start işlemi yapmak yerine kullanılır) !!!
+
+Container silme
+docker rm project24_container (container silme işlemi yapar)
+docker run --rm --name project24_container project24img
+docker rm project24_container --force (Çalışan bir container siler)
+
+image silme
+docker rmi project24img
+docker rmi project24img --force (buna bağlı çalışan bir container silinmeden bu çalışmaz önce stop sonra --force)

@@ -1,0 +1,103 @@
+projede udemy benzeri bir site yapılacak.
+ 
+7 tane microservis, 1 tane de microservisleri tüketen client uygulaması olacak. Client uygulaması bir core mvc uygulaması olacak. Bu msler hem senkron hem de asenkron iletişim kuracaklar.
+DB olarak Mongodb kullanılacak. ORM aracı olarak EF Core kullanılacak.Domain Driven Design kullanılacak. Bir ms, diğer msin veritabanına doğrudan erişmemeli.
+
+
+Her msin kendisine ait bir veritabanı olacak. Kullanılacak veritabanları:
+1.)sql server 2019 express
+2.)postgresql
+3.)mongodb(no sql)
+4.)redis(no sql)(dataları memoryde tutar)
+
+dbeaver community ide
+mongodbcompass
+another redis desktop manager
+
+
+Monolitik Mimari
+-----------------
+Tek solution içerisinde katmanlardan oluşan, tek bir veritabanı olan projeler. Katmanlı mimari monolitik mimariye örnektir.
+
+Microservis Mimarisi
+--------------------
+Birbirinden bağımsız olarak gelişebilen ve birbirleriyle iletişebilen servislerdir. Her msin kendisine ait veritabanı vardır.
+
+Microservisler Arası İletişim
+------------------------------
+Senkron İletişim: Bir ms, diğer mse istek attığında sonucu bekliyorsa bu senkron bir iletişimdir.
+Asenkron İletişim: Bir mesaj kuyruk sistemi vardır. A msi B msi ile iletişime geçmek istediğinde, mesaj kuyruk sistemine bir mesaj gönderir. Asenkron iletişimde sonuç beklenmez.
+
+Message ve Event Farkı
+-----------------------
+Message: işlenmesi için gerekli datayı taşır. Mesajı gönderen mesajın nasıl işleneceğini bilir.(WordToPdf)
+Event: eventler bir notification sistemi sağlar. eventi yollayan onun nasıl ele alınacağını bilmez.(UserCreatedEvent, OrderCreatedEvent)
+
+
+Distributed Transaction
+------------------------
+
+Microservice mimarisini kullanmanın bir çok avantajı var. Ancak bu avantajlar bir takım zorlukları da beraberinde getiriyor. Bu zorluklardan bir tanesi de servislere 
+yayılmış distributed transaction‘ları yönetirken veri tutarlılığının sağlanmasıdır. Bu zorluğun üstesinden gelmek için Saga Pattern kullanılır.
+
+Örneğin: bir e-commerce uygulamasında müşteri sepetindeki ürünleri siparişe çevirdiğinde bu istek Order mikroservisine giderek siparişi işliyor. Ancak bu işlemden sonra
+ Inventory mikroservisininde stoğu güncellemesi gerekiyor. Bu durumda iki mikroservisinde kendi verisini tek bir istekte işlemesi gerekiyor. Mikroservis mimarisi yerine monolithic
+ bir yapıyla çalışıyor olsaydık tek bir veritabanı kullanıyor olacak ve işlemlerimizi tek bir transaction ile gerçekleştirebilecektik. Her bir mikroservis dağıtık ve kendi veritabanını 
+kullandığı için bu noktada distributed transaction kavramı devreye giriyor.
+
+Ayrıca bu işlemler gerçekleşirken veri tutarlılığının da sağlanması gerekiyor. Sipariş işlendikten sonra stok miktarının da düşürül(e)mediği durumlarda veriler arasında tutarsızlıklar 
+oluşmaya başlayacak. Buna göre gerçekleşen bir transaction’un başarılı sayılabilmesi için ACID yani, Atomic, Consistent, Isolated ve Durable özelliklerini taşıyor olması gerekiyor.
+
+Atomicity: tüm transaction’lar ya başarıyla gerçekleşmeli ya da hiç biri gerçekleşmemeli,
+Consistency: transaction sonucunda tüm veriler consistent olmalı, veriler arasında bir tutarsızlık olmamalı,
+Isolation: transaction bir diğer transaction tarafından etkilenmemeli,
+Durability: transaction sırasında bir hata alınması durumunda veriler bir önceki haline döndürülebilmelidir.
+
+
+Microservisler Arasında Distributed Transaction Nasıl Yönetilir
+---------------------------------------------------------------
+* Two Phase Commit
+* Saga Pattern
+* Eventual Consistency
+
+
+
+
+JWT(JSON WEB TOKEN)
+-------------------
+Web projelerimizi geliştirirken kullanıcı kimliklendirme/yetkilendirme işlemi oldukça önemlidir. Uygulamamızı yetkisiz kişilerden korumak ve yalnızca yetkili kullanıcıların erişimi için 
+çeşitli yöntemler kullanırız. Bu çözümlerden birisi de token kullanmaktır. İşte bu noktada çeşitli standartlar bulunmaktadır. Bu yazımızda da JWT ile Authorization işlemine bakacağız. 
+Burada Authentication ile karıştırılmamalı. Authentication, kimlik doğrulamadır. Authorization ise sisteme giriş için yetki kontrolüdür. Authentication birkez yapıldıktan sonra, atılan 
+her istekte bir authorization işlemi yapılır. Tabi bu durum geliştirdiğiniz uygulamaya göre değişebilir.
+Senaryomuz
+
+1- Client(İstemci), login sayfasında kullanıcı adı(veya mail) ve parola ile sunucu tarafına bir login isteği gönderir.
+
+2- Sunucu gelen bilgiyi veritabanı sorgusu ile kontrol eder. Eğer geçersizse authentication error ‘401 Unauthorized’ döner, geçerliyse kullanıcı bilgileri ve önceden belirlenmiş bir 
+gizli anahtar ile token oluşturur. Bu token client tarafına HTTP isteğinin ‘Header’ kısmında gönderir. (Ayrıca oluşturulan token veritabanında ilgili kullanıcı adına kaydedilebilir 
+ama JWT’nin çalışmasını etkilemez.)
+
+3- Client(İstemci) gelen token bilgisini local depolama(localStorage gibi) alanında tutar. Daha sonra yetki isteyen tüm isteklerde(get, post, put, delete…) Header bilgisi içerisinde
+ bu token bilgisini gönderir. Gelen her istekte sunucu tokenı kontrol eder(verify) ve kullanıcının erişip erişemeyeceğini denetler. Erişim kabul edilirse normal şekilde veri akışı
+ devam eder. Kabul etmezse client tarafına ‘403 Forbidden’ döner.
+
+JWT(JSON Web Tokens) Avantajları
+1- Stateless çalışır. Yani kontrol edecek bir Session bulunmamaktadır. Bilgiler ve son geçerlilik tarihi ne sunucuda ne client tarafında tutulur. 
+Token içerisinde gerekli bilgiler tutulur.
+
+2- Portable çalışır. Birden çok backend ile çalışabilir, yalnızca 2 taraf arasında kullanılmak zorunda değildir. Bu durum hem web uygulamanız 
+ hem de mobil uygulamanız aynı web servisi kullandığında oldukça önemlidir.
+
+3- JSON formatını kullanır.
+
+4- Doğrulama işlemi diğer Authorization metodlarına göre daha hızlıdır. Doğrulama işlemi için veritabanı ile bağlantı kurmaya gerek kalmaz.
+
+5- Cookie kullanmaya gerek yoktur. Mobil uygulamalar için de rahatlıkla kullanılabilir.
+
+Redis
+-------
+Distiribute Cache ve aynı zamanda nosql veritabanıdır.
+
+RabbitMQ
+-----------
+Mesaj kuyruk sistemidir.
